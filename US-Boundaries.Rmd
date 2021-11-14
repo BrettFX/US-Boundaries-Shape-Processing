@@ -1,0 +1,201 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.11.3
+  kernelspec:
+    display_name: Python3 (geopandas_env)
+    language: python
+    name: geo_env
+---
+
+```{python}
+import geopandas as gpd
+import folium
+import matplotlib.pyplot as plt
+from shapely.geometry import MultiPolygon, Polygon
+import shapely.wkt
+```
+
+```{sh}
+ls -l
+```
+
+```{python}
+gdf = gpd.read_file("US-State-Boundaries-Shapefile.zip")
+```
+
+```{python}
+gdf.info()
+```
+
+```{python}
+gdf.head(1).transpose()
+```
+
+```{python}
+len(gdf)
+```
+
+```{python}
+# List of CONUS states (excluding Alaska and Hawaii) to be used to filter original dataframe
+states = [
+    "Alabama", "Arizona", "Arkansas", "California", 
+    "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", 
+    "Idaho", "Illinois", "Indiana", "Iowa", 
+    "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", 
+    "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", 
+    "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", 
+    "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", 
+    "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", 
+    "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", 
+    "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+]
+```
+
+```{python}
+# Filter by 50 states
+filtered_gdf = gdf[gdf["STATE"].isin(states)]
+```
+
+```{python}
+filtered_gdf.head(1).transpose()
+```
+
+```{python}
+# geometry_wkt = gdf.geometry.to_wkt()
+```
+
+```{python}
+# type(geometry_wkt)
+```
+
+```{python}
+# type(geometry_wkt[0])
+```
+
+```{python}
+# multi_poly = shapely.wkt.loads(geometry_wkt[0])
+```
+
+```{python}
+# type(multi_poly)
+```
+
+```{python}
+# polys_list = list(multi_poly)
+```
+
+```{python}
+# len(polys_list)
+```
+
+```{python}
+# polys_list[0]
+```
+
+```{python}
+filtered_gdf.plot(figsize=(12, 12))
+plt.show()
+```
+
+```{python}
+filtered_gdf.crs
+```
+
+```{python}
+help(folium.Map)
+```
+
+```{python}
+m = folium.Map(location=[39.8283, -98.5795], tiles='Cartodb positron', zoom_start=4, prefer_canvas=True)
+```
+
+```{python}
+help(folium.Popup)
+```
+
+```{python}
+for _, r in filtered_gdf.iterrows():
+    # Without simplifying the representation of each borough,
+    # the map might not be displayed
+    sim_geo = gpd.GeoSeries(r['geometry']).simplify(tolerance=0.001)
+    geo_j = sim_geo.to_json()
+    geo_j = folium.GeoJson(data=geo_j,
+                           style_function=lambda x: {'fillColor': 'orange'})
+#     folium.Popup(r['STATE']).add_to(geo_j)
+    folium.Tooltip(r['STATE']).add_to(geo_j)
+    geo_j.add_to(m)
+```
+
+```{python}
+m
+```
+
+```{python}
+# Group geometries into a single multipolygon object
+list_wkt = []
+for _, r in filtered_gdf.iterrows():
+    list_wkt.append(r['geometry'].to_wkt())
+```
+
+```{python}
+list_polygons =  [shapely.wkt.loads(poly) for poly in list_wkt]
+```
+
+```{python}
+list_polygons[0]
+```
+
+```{python}
+len(list_polygons)
+```
+
+```{python}
+multipoly = MultiPolygon(list_polygons)
+```
+
+```{python}
+multipoly.bounds
+```
+
+```{python}
+# Visualize multipolygon with geopandas
+multipoly_gdf = gpd.GeoSeries(multipoly)
+multipoly_gdf.plot(figsize=(12, 12))
+plt.show()
+```
+
+```{python}
+# Write Multipolygon WKT to file
+with open("us-boundaries.wkt", "w") as wkt_file:
+    wkt_file.write(multipoly.wkt)
+```
+
+```{sh}
+ls -lah us-boundaries.wkt
+```
+
+```{python}
+# Test loading the output WKT file back in to a shapely MultiPolygon object
+# shapely.wkt.loads
+with open("us-boundaries.wkt", "r") as wkt_file:
+    new_multipoly = shapely.wkt.load(wkt_file)
+```
+
+```{python}
+new_multipoly_gdf = gpd.GeoSeries(new_multipoly)
+new_multipoly_gdf.plot(figsize=(12, 12))
+plt.show()
+```
+
+```{python}
+type(new_multipoly)
+```
+
+```{python}
+
+```
