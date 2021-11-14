@@ -28,8 +28,6 @@ gdf.info()
 
 gdf.head(1).transpose()
 
-len(gdf)
-
 # List of CONUS states (excluding Alaska and Hawaii) to be used to filter original dataframe
 states = [
     "Alabama", "Arizona", "Arkansas", "California", 
@@ -49,41 +47,13 @@ filtered_gdf = gdf[gdf["STATE"].isin(states)]
 
 filtered_gdf.head(1).transpose()
 
-# +
-# geometry_wkt = gdf.geometry.to_wkt()
-
-# +
-# type(geometry_wkt)
-
-# +
-# type(geometry_wkt[0])
-
-# +
-# multi_poly = shapely.wkt.loads(geometry_wkt[0])
-
-# +
-# type(multi_poly)
-
-# +
-# polys_list = list(multi_poly)
-
-# +
-# len(polys_list)
-
-# +
-# polys_list[0]
-# -
-
 filtered_gdf.plot(figsize=(12, 12))
 plt.show()
 
-filtered_gdf.crs
-
-help(folium.Map)
+# Ensure the current crs is EPSG:4269
+print(filtered_gdf.crs)
 
 m = folium.Map(location=[39.8283, -98.5795], tiles='Cartodb positron', zoom_start=4, prefer_canvas=True)
-
-help(folium.Popup)
 
 for _, r in filtered_gdf.iterrows():
     # Without simplifying the representation of each borough,
@@ -92,7 +62,6 @@ for _, r in filtered_gdf.iterrows():
     geo_j = sim_geo.to_json()
     geo_j = folium.GeoJson(data=geo_j,
                            style_function=lambda x: {'fillColor': 'orange'})
-#     folium.Popup(r['STATE']).add_to(geo_j)
     folium.Tooltip(r['STATE']).add_to(geo_j)
     geo_j.add_to(m)
 
@@ -108,13 +77,7 @@ for _, r in filtered_gdf.iterrows():
 
 list_polygons =  [shapely.wkt.loads(poly) for poly in list_wkt]
 
-list_polygons[0]
-
-len(list_polygons)
-
 multipoly = MultiPolygon(list_polygons)
-
-multipoly.bounds
 
 # Visualize multipolygon with geopandas
 multipoly_gdf = gpd.GeoSeries(multipoly)
@@ -137,7 +100,5 @@ with open("us-boundaries.wkt", "r") as wkt_file:
 new_multipoly_gdf = gpd.GeoSeries(new_multipoly)
 new_multipoly_gdf.plot(figsize=(12, 12))
 plt.show()
-
-type(new_multipoly)
 
 

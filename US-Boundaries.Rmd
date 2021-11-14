@@ -37,10 +37,6 @@ gdf.head(1).transpose()
 ```
 
 ```{python}
-len(gdf)
-```
-
-```{python}
 # List of CONUS states (excluding Alaska and Hawaii) to be used to filter original dataframe
 states = [
     "Alabama", "Arizona", "Arkansas", "California", 
@@ -66,56 +62,17 @@ filtered_gdf.head(1).transpose()
 ```
 
 ```{python}
-# geometry_wkt = gdf.geometry.to_wkt()
-```
-
-```{python}
-# type(geometry_wkt)
-```
-
-```{python}
-# type(geometry_wkt[0])
-```
-
-```{python}
-# multi_poly = shapely.wkt.loads(geometry_wkt[0])
-```
-
-```{python}
-# type(multi_poly)
-```
-
-```{python}
-# polys_list = list(multi_poly)
-```
-
-```{python}
-# len(polys_list)
-```
-
-```{python}
-# polys_list[0]
-```
-
-```{python}
 filtered_gdf.plot(figsize=(12, 12))
 plt.show()
 ```
 
 ```{python}
-filtered_gdf.crs
-```
-
-```{python}
-help(folium.Map)
+# Ensure the current crs is EPSG:4269
+print(filtered_gdf.crs)
 ```
 
 ```{python}
 m = folium.Map(location=[39.8283, -98.5795], tiles='Cartodb positron', zoom_start=4, prefer_canvas=True)
-```
-
-```{python}
-help(folium.Popup)
 ```
 
 ```{python}
@@ -126,7 +83,6 @@ for _, r in filtered_gdf.iterrows():
     geo_j = sim_geo.to_json()
     geo_j = folium.GeoJson(data=geo_j,
                            style_function=lambda x: {'fillColor': 'orange'})
-#     folium.Popup(r['STATE']).add_to(geo_j)
     folium.Tooltip(r['STATE']).add_to(geo_j)
     geo_j.add_to(m)
 ```
@@ -152,19 +108,7 @@ list_polygons =  [shapely.wkt.loads(poly) for poly in list_wkt]
 ```
 
 ```{python}
-list_polygons[0]
-```
-
-```{python}
-len(list_polygons)
-```
-
-```{python}
 multipoly = MultiPolygon(list_polygons)
-```
-
-```{python}
-multipoly.bounds
 ```
 
 ```{python}
@@ -195,10 +139,6 @@ with open("us-boundaries.wkt", "r") as wkt_file:
 new_multipoly_gdf = gpd.GeoSeries(new_multipoly)
 new_multipoly_gdf.plot(figsize=(12, 12))
 plt.show()
-```
-
-```{python}
-type(new_multipoly)
 ```
 
 ```{python}
