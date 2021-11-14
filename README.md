@@ -3,3 +3,6 @@ With extracted United States shapefile data as input, use geoprocessing tools to
 
 **Data Used:**
 * State Boundaries of the United States, 2005 - https://geodata.lib.utexas.edu/catalog/stanford-vw421bb8115
+
+## Extraction Results (Folium/LeafletJs)
+![US Boundaries Extraction Results](https://github.com/BrettFX/US-Boundaries-Shape-Processing/blob/main/US-Boundaries.png?raw=true)
