@@ -98,6 +98,9 @@ for _, r in filtered_gdf.iterrows():
 
 m
 
+# Save map as html file
+m.save("US-Boundaries.html")
+
 # Group geometries into a single multipolygon object
 list_wkt = []
 for _, r in filtered_gdf.iterrows():
